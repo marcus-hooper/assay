@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# assay uninstall — remove skill symlinks from Claude Code
+set -e
+
+ASSAY_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
+
+echo "assay — removing skills"
+echo ""
+
+# ─── Remove individual skill symlinks ────────────────────────────────
+removed=()
+for skill_dir in "$ASSAY_DIR"/*/; do
+  if [ -f "$skill_dir/SKILL.md" ]; then
+    skill_name="$(basename "$skill_dir")"
+    target="$CLAUDE_SKILLS_DIR/$skill_name"
+    if [ -L "$target" ]; then
+      rm "$target"
+      removed+=("$skill_name")
+    fi
+  fi
+done
+
+if [ ${#removed[@]} -gt 0 ]; then
+  echo "  removed skills: ${removed[*]}"
+fi
+
+# ─── Remove assay symlink ────────────────────────────────────────────
+ASSAY_LINK="$CLAUDE_SKILLS_DIR/assay"
+if [ -L "$ASSAY_LINK" ]; then
+  rm "$ASSAY_LINK"
+  echo "  removed: $ASSAY_LINK"
+fi
+
+echo ""
+echo "assay uninstalled."
